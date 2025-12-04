@@ -348,6 +348,9 @@ components:
     SignalProcessorOperationType:
       type: object
       properties:
+        id:
+          type: string
+          format: uuid
         name:
           type: string
         type:
@@ -362,6 +365,7 @@ components:
           items:
             $ref: "#/components/schemas/Parameter"
       required:
+        - id
         - name
         - type
         - inputParameters
