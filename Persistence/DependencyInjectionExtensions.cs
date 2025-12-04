@@ -17,6 +17,7 @@ public static class DependencyInjectionExtensions
 
         services.AddScoped<ISignalRepository, SignalRepository>();
         services.AddScoped<ICustomFunctionRepository, CustomFunctionRepository>();
+        services.AddScoped<ISimpleOperationTypeRepository, SimpleOperationTypeRepository>();
 
         return services;
     }

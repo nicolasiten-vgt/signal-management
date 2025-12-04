@@ -43,13 +43,13 @@ public class SignalDbContext : DbContext
             entity.Property(cf => cf.InputParameters)
                 .HasColumnType("jsonb")
                 .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<ParameterDefinition>>(v, (JsonSerializerOptions)null));
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<ParameterDefinition>>(v, (JsonSerializerOptions?)null));
             entity.Property(cf => cf.OutputParameters)
                 .HasColumnType("jsonb")
                 .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-                    v => JsonSerializer.Deserialize<List<ParameterDefinition>>(v, (JsonSerializerOptions)null));
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<ParameterDefinition>>(v, (JsonSerializerOptions?)null));
         });
     }
 }

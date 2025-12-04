@@ -9,6 +9,7 @@ public static class DependencyInjectionExtensions
     {
         return services
             .AddTransient<ISignalService, SignalService>()
-            .AddTransient<ICustomFunctionService, CustomFunctionService>();
+            .AddTransient<ICustomFunctionService, CustomFunctionService>()
+            .AddTransient<ISignalProcessorOperationTypeService, SignalProcessorOperationTypeService>();
     }
 }
