@@ -1,0 +1,576 @@
+﻿openapi: 3.0.0
+info:
+  title: Toolbox API
+  version: 1.0.0
+paths:
+  /signals:
+    post:
+      summary: Create a new Signal
+      tags:
+        - Signals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignalCreateRequest"
+      responses:
+        "201":
+          description: Signal successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Signal"
+    get:
+      summary: Get all Signals
+      tags:
+        - Signals
+      responses:
+        "200":
+          description: A list of Signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Signal"
+  /signals/{id}:
+    get:
+      summary: Get Signal by ID
+      tags:
+        - Signals
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Signal found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Signal"
+        "404":
+          description: Signal not found
+  /custom-functions:
+    post:
+      summary: Create a Custom Function
+      tags:
+        - Custom Functions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomFunctionCreateRequest"
+      responses:
+        "201":
+          description: Custom Function created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomFunction"
+
+    get:
+      summary: Get all Custom Functions
+      tags:
+        - Custom Functions
+      responses:
+        "200":
+          description: A list of Custom Functions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CustomFunction"
+  /custom-functions/{id}:
+    get:
+      summary: Get a Custom Function by ID
+      tags:
+        - Custom Functions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Custom Function found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomFunction"
+        "404":
+          description: Not found
+    delete:
+      summary: Delete a Custom Function by ID
+      tags:
+        - Custom Functions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Custom Function deleted
+        "404":
+          description: Not found
+  /signal-processor-operation-types:
+    get:
+      summary: Get all signal processor operation types (operations + custom functions)
+      tags:
+        - Signal Processor Operation Types
+      responses:
+        "200":
+          description: List of all operation types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SignalProcessorOperationType"
+  /signal-processors:
+    get:
+      summary: Get all SignalProcessors
+      tags:
+        - Signal Processor
+      responses:
+        "200":
+          description: List of SignalProcessors
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SignalProcessor"
+    post:
+      summary: Create a new SignalProcessor
+      tags:
+        - Signal Processor
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignalProcessorCreateRequest"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignalProcessor"
+  /signal-processors/{id}:
+    get:
+      summary: Get a SignalProcessor by ID
+      tags:
+        - Signal Processor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: SignalProcessor found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignalProcessor"
+        "404":
+          description: Not found
+    delete:
+      summary: Delete a SignalProcessor by ID
+      tags:
+        - Signal Processor
+      operationId: deleteSignalProcessor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+components:
+  schemas:
+    Signal:
+      type: object
+      required:
+        - id
+        - name
+        - input
+        - output
+        - unit
+        - dataType
+        - scope
+        - createdAt
+        - createdBy
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        input:
+          type: boolean
+          description: "Signal can be used as input for SignalProcessor"
+        output:
+          type: boolean
+          description: "Signal can be produced as output by SignalProcessor"
+        unit:
+          type: string
+        dataType:
+          type: string
+          enum: [Numeric, String]
+          description: |
+            Numeric → Decimal  
+            String → Text value
+        scope:
+          type: string
+          enum: [Global, Edge, Tenant]
+          description: |
+            - Global  
+            - Edge  
+            - Tenant (example: AEW)
+        edgeInstance:
+          type: string
+          nullable: true
+          description: "Optional: further limits Scope to a specific Edge Instance"
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+    SignalCreateRequest:
+      type: object
+      required:
+        - id
+        - name
+        - input
+        - output
+        - unit
+        - dataType
+        - scope
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        input:
+          type: boolean
+        output:
+          type: boolean
+        unit:
+          type: string
+        dataType:
+          type: string
+          enum: [Numeric, String]
+        scope:
+          type: string
+          enum: [Global, Edge, Tenant]
+        edgeInstance:
+          type: string
+          nullable: true
+    CustomFunction:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        language:
+          type: string
+          enum: [Csharp, JavaScript]
+        inputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParameterDefinition"
+        outputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParameterDefinition"
+        sourceCode:
+          type: string
+        dependencies:
+          type: string
+      required:
+        - id
+        - name
+        - language
+        - sourceCode
+    CustomFunctionCreateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        language:
+          type: string
+          enum: [Csharp, JavaScript]
+        inputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParameterDefinition"
+        outputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ParameterDefinition"
+        sourceCode:
+          type: string
+        dependencies:
+          type: string
+      required:
+        - name
+        - language
+        - sourceCode
+    ParameterDefinition:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          description: Data type of the parameter (e.g., numeric, string, boolean)
+    SignalProcessorOperationType:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [simple, customFunction]
+        inputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/Parameter"
+        outputParameters:
+          type: array
+          items:
+            $ref: "#/components/schemas/Parameter"
+      required:
+        - name
+        - type
+        - inputParameters
+        - outputParameters
+    Parameter:
+      type: object
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+      required:
+        - name
+        - dataType
+    SignalProcessor:
+      type: object
+      required:
+        - id
+        - name
+        - recomputeTrigger
+        - computeGraph
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        recomputeTrigger:
+          $ref: "#/components/schemas/RecomputeTrigger"
+        recomputeIntervalSec:
+          type: integer
+          nullable: true
+        computeGraph:
+          $ref: "#/components/schemas/ComputeGraph"
+    SignalProcessorCreateRequest:
+      type: object
+      required:
+        - name
+        - recomputeTrigger
+        - computeGraph
+      properties:
+        name:
+          type: string
+        recomputeTrigger:
+          $ref: "#/components/schemas/RecomputeTrigger"
+        recomputeIntervalSec:
+          type: integer
+          nullable: true
+        computeGraph:
+          $ref: "#/components/schemas/ComputeGraph"
+    RecomputeTrigger:
+      type: string
+      enum:
+        - Interval
+        - SignalChange
+    ComputeGraph:
+      type: array
+      items:
+        $ref: "#/components/schemas/ComputeStep"
+    ComputeStep:
+      type: object
+      required:
+        - id
+        - operation
+        - inputs
+        - outputs
+      properties:
+        id:
+          type: string
+        operation:
+          $ref: "#/components/schemas/Operation"
+        inputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/InputDefinition"
+        outputs:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutputDefinition"
+    Operation:
+      oneOf:
+        - $ref: "#/components/schemas/SimpleOperation"
+        - $ref: "#/components/schemas/CustomFunctionOperation"
+      discriminator:
+        propertyName: type
+        mapping:
+          simple: "#/components/schemas/SimpleOperation"
+          customFunction: "#/components/schemas/CustomFunctionOperation"
+    SimpleOperation:
+      type: object
+      required:
+        - type
+        - action
+      properties:
+        type:
+          type: string
+          enum: [simple]
+        action:
+          type: string
+    CustomFunctionOperation:
+      type: object
+      required:
+        - type
+        - customFunctionId
+      properties:
+        type:
+          type: string
+          enum: [customFunction]
+        customFunctionId:
+          type: string
+          format: uuid
+    InputDefinition:
+      type: object
+      required:
+        - name
+        - dataType
+        - source
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          enum:
+            - numeric
+            - string
+            - boolean
+        source:
+          $ref: "#/components/schemas/InputSource"
+    InputSource:
+      oneOf:
+        - $ref: "#/components/schemas/SignalInputSource"
+        - $ref: "#/components/schemas/ConstantInputSource"
+        - $ref: "#/components/schemas/StepOutputInputSource"
+      discriminator:
+        propertyName: type
+        mapping:
+          signal: "#/components/schemas/SignalInputSource"
+          constant: "#/components/schemas/ConstantInputSource"
+          stepOutput: "#/components/schemas/StepOutputInputSource"
+    SignalInputSource:
+      type: object
+      required:
+        - type
+        - signalId
+      properties:
+        type:
+          type: string
+          enum: [signal]
+        signalId:
+          type: string
+    ConstantInputSource:
+      type: object
+      required:
+        - type
+        - value
+      properties:
+        type:
+          type: string
+          enum: [constant]
+        value:
+          type: string
+    StepOutputInputSource:
+      type: object
+      required:
+        - type
+        - stepId
+        - stepOutputId
+      properties:
+        type:
+          type: string
+          enum: [stepOutput]
+        stepId:
+          type: string
+        stepOutputId:
+          type: string
+    OutputDefinition:
+      type: object
+      required:
+        - name
+        - dataType
+      properties:
+        name:
+          type: string
+        dataType:
+          type: string
+          enum:
+            - numeric
+            - string
+            - boolean
+        targets:
+          type: array
+          nullable: true
+          items:
+            $ref: "#/components/schemas/OutputTarget"
+    OutputTarget:
+      oneOf:
+        - $ref: "#/components/schemas/SignalOutputTarget"
+      discriminator:
+        propertyName: type
+        mapping:
+          signal: "#/components/schemas/SignalOutputTarget"
+    SignalOutputTarget:
+      type: object
+      required:
+        - type
+        - signalId
+      properties:
+        type:
+          type: string
+          enum: [signal]
+        signalId:
+          type: string
