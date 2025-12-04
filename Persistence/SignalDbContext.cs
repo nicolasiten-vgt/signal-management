@@ -54,7 +54,7 @@ public class SignalDbContext : DbContext
     }
 }
 
-public class BloggingContextFactory : IDesignTimeDbContextFactory<SignalDbContext>
+public class SignalDbContextFactory : IDesignTimeDbContextFactory<SignalDbContext>
 {
     public SignalDbContext CreateDbContext(string[] args)
     {
