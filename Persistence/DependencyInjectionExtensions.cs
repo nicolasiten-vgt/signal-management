@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Repositories;
@@ -16,6 +16,7 @@ public static class DependencyInjectionExtensions
         });
 
         services.AddScoped<ISignalRepository, SignalRepository>();
+        services.AddScoped<ICustomFunctionRepository, CustomFunctionRepository>();
 
         return services;
     }
