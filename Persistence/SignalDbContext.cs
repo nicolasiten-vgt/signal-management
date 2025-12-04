@@ -14,6 +14,7 @@ public class SignalDbContext : DbContext
 
     public DbSet<SignalEntity> Signals => Set<SignalEntity>();
     public DbSet<CustomFunctionEntity> CustomFunctions => Set<CustomFunctionEntity>();
+    public DbSet<SignalProcessorEntity> SignalProcessors => Set<SignalProcessorEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -50,6 +51,23 @@ public class SignalDbContext : DbContext
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                     v => JsonSerializer.Deserialize<List<ParameterDefinition>>(v, (JsonSerializerOptions?)null));
+        });
+
+        modelBuilder.Entity<SignalProcessorEntity>(entity =>
+        {
+            entity.HasKey(sp => sp.Id);
+            entity.Property(sp => sp.Id).IsRequired();
+            entity.Property(sp => sp.Name).IsRequired();
+            entity.HasIndex(sp => sp.Name).IsUnique();
+            entity.Property(sp => sp.RecomputeTrigger).IsRequired();
+            entity.Property(sp => sp.RecomputeIntervalSec);
+            entity.Property(sp => sp.ComputeGraph)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<ComputeStep>>(v, (JsonSerializerOptions?)null) ?? new List<ComputeStep>());
+            entity.Property(sp => sp.CreatedAt).IsRequired();
+            entity.Property(sp => sp.CreatedBy).IsRequired();
         });
     }
 }

@@ -18,10 +18,11 @@ public static class DependencyInjectionExtensions
         services.AddScoped<ISignalRepository, SignalRepository>();
         services.AddScoped<ICustomFunctionRepository, CustomFunctionRepository>();
         services.AddScoped<ISimpleOperationTypeRepository, SimpleOperationTypeRepository>();
+        services.AddScoped<ISignalProcessorRepository, SignalProcessorRepository>();
 
         return services;
     }
-    
+
     public static void MigrateDatabase(this IServiceProvider serviceProvider)
     {
         using var scope = serviceProvider.CreateScope();
