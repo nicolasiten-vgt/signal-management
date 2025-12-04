@@ -29,7 +29,7 @@ public class CustomFunctionService : ICustomFunctionService
         return await _repository.CreateAsync(customFunction, ct);
     }
 
-    public async Task<IReadOnlyList<CustomFunction>> GetAllAsync(CancellationToken ct)
+    public async Task<IReadOnlyCollection<CustomFunction>> GetAllAsync(CancellationToken ct)
     {
         return await _repository.GetAllAsync(ct);
     }

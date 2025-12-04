@@ -4,5 +4,5 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Repositories;
 
 public interface ISimpleOperationTypeRepository
 {
-    Task<List<SignalProcessorOperationType>> GetAllAsync();
+    Task<IReadOnlyCollection<SignalProcessorOperationType>> GetAllAsync();
 }

@@ -31,7 +31,7 @@ public class SignalService : ISignalService
         return await _repository.CreateAsync(signal, ct);
     }
 
-    public async Task<IReadOnlyList<Signal>> GetAllAsync(CancellationToken ct)
+    public async Task<IReadOnlyCollection<Signal>> GetAllAsync(CancellationToken ct)
     {
         return await _repository.GetAllAsync(ct);
     }

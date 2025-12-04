@@ -8,5 +8,5 @@ public interface ISignalRepository
     
     Task<Signal?> GetByIdAsync(string id, CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<Signal>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<Signal>> GetAllAsync(CancellationToken cancellationToken = default);
 }

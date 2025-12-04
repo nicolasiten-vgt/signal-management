@@ -8,7 +8,7 @@ public interface ICustomFunctionRepository
     
     Task<CustomFunction?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     
-    Task<IReadOnlyList<CustomFunction>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyCollection<CustomFunction>> GetAllAsync(CancellationToken cancellationToken = default);
     
     Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

@@ -31,7 +31,7 @@ public class SignalRepository : ISignalRepository
         return entity == null ? null : ToDomain(entity);
     }
 
-    public async Task<IReadOnlyList<Signal>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<Signal>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _db.Signals.AsNoTracking().ToListAsync(cancellationToken);
         return entities.Select(ToDomain).ToList();

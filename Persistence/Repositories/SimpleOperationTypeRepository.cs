@@ -4,7 +4,7 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Repositories;
 
 public class SimpleOperationTypeRepository : ISimpleOperationTypeRepository
 {
-    private static readonly List<SignalProcessorOperationType> _operations = new()
+    private static readonly List<SignalProcessorOperationType> Operations = new()
     {
         new SignalProcessorOperationType
         {
@@ -68,8 +68,8 @@ public class SimpleOperationTypeRepository : ISimpleOperationTypeRepository
         }
     };
 
-    public Task<List<SignalProcessorOperationType>> GetAllAsync()
+    public Task<IReadOnlyCollection<SignalProcessorOperationType>> GetAllAsync()
     {
-        return Task.FromResult(_operations);
+        return Task.FromResult((IReadOnlyCollection<SignalProcessorOperationType>)Operations);
     }
 }

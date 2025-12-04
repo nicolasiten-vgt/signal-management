@@ -4,5 +4,5 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 
 public interface ISignalProcessorOperationTypeService
 {
-    Task<List<SignalProcessorOperationType>> GetAllAsync(CancellationToken ct = default);
+    Task<IReadOnlyCollection<SignalProcessorOperationType>> GetAllAsync(CancellationToken ct = default);
 }

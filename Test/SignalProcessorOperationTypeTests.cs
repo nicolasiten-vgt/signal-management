@@ -31,7 +31,7 @@ public class SignalProcessorOperationTypeTests : TestBase
     public async Task GetAllAsync_WithoutCustomFunctions_ReturnsSimpleOperations()
     {
         // Act
-        List<SignalProcessorOperationType> result = await _operationTypeService.GetAllAsync();
+        IReadOnlyCollection<SignalProcessorOperationType> result = await _operationTypeService.GetAllAsync();
 
         // Assert - Should have at least 4 simple operations
         List<SignalProcessorOperationType> simpleOps = result.Where(x => x.Type == OperationType.Simple).ToList();
@@ -67,7 +67,7 @@ public class SignalProcessorOperationTypeTests : TestBase
                 new() { Name = "a", DataType = "numeric" }
             },
             OutputParameters: new List<ParameterDefinition>
-            {
+            {                      
                 new() { Name = "result", DataType = "numeric" }
             },
             SourceCode: "return a + b;",
@@ -76,7 +76,7 @@ public class SignalProcessorOperationTypeTests : TestBase
         CustomFunction customFunction = await _customFunctionService.CreateAsync(createRequest, CancellationToken.None);
 
         // Act
-        List<SignalProcessorOperationType> result = await _operationTypeService.GetAllAsync();
+        IReadOnlyCollection<SignalProcessorOperationType> result = await _operationTypeService.GetAllAsync();
 
         // Assert - Should include the custom function
         Assert.IsTrue(result.Count > 1); // custom function plus simple operations

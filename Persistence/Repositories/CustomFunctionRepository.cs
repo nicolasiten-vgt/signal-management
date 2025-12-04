@@ -31,7 +31,7 @@ public class CustomFunctionRepository : ICustomFunctionRepository
         return entity == null ? null : ToDomain(entity);
     }
 
-    public async Task<IReadOnlyList<CustomFunction>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyCollection<CustomFunction>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await _db.CustomFunctions.AsNoTracking().ToListAsync(cancellationToken);
         return entities.Select(ToDomain).ToList();

@@ -16,35 +16,12 @@ public class SignalProcessorOperationTypeService : ISignalProcessorOperationType
         _customFunctionService = customFunctionService;
     }
 
-    public async Task<List<SignalProcessorOperationType>> GetAllAsync(CancellationToken ct = default)
+    public async Task<IReadOnlyCollection<SignalProcessorOperationType>> GetAllAsync(CancellationToken ct = default)
     {
-        List<SignalProcessorOperationType> result = new();
+        var simpleOperations = await _simpleOperationTypeRepository.GetAllAsync();
+        var customFunctions = await _customFunctionService.GetAllAsync(ct);
 
-        // Get simple operations
-        List<SignalProcessorOperationType> simpleOperations = await _simpleOperationTypeRepository.GetAllAsync();
-        result.AddRange(simpleOperations);
-
-        // Get custom functions and map them to operation types
-        IReadOnlyList<CustomFunction> customFunctions = await _customFunctionService.GetAllAsync(ct);
-        List<SignalProcessorOperationType> customFunctionOperations = customFunctions.Select(cf => new SignalProcessorOperationType
-        {
-            Id = cf.Id,
-            Name = cf.Name,
-            Type = OperationType.CustomFunction,
-            InputParameters = cf.InputParameters?.Select(p => new Parameter
-            {
-                Name = p.Name,
-                DataType = p.DataType
-            }).ToList() ?? new List<Parameter>(),
-            OutputParameters = cf.OutputParameters?.Select(p => new Parameter
-            {
-                Name = p.Name,
-                DataType = p.DataType
-            }).ToList() ?? new List<Parameter>()
-        }).ToList();
-
-        result.AddRange(customFunctionOperations);
-
-        return result;
+        var signalProcessorOperationTypes = new SignalProcessorOperationTypes(simpleOperations, customFunctions);
+        return signalProcessorOperationTypes.All;
     }
 }
