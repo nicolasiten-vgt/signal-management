@@ -28,6 +28,7 @@ public class SignalProcessor
 
         // Run all domain validations
         SignalProcessorValidator.ValidateRecomputeIntervalRules(this);
+        SignalProcessorValidator.ValidateStepIdsUnique(computeGraph);
         SignalProcessorValidator.ValidateGraphAcyclic(computeGraph);
         SignalProcessorValidator.ValidateGraphConnected(computeGraph);
         SignalProcessorValidator.ValidateStepOutputReferences(computeGraph);

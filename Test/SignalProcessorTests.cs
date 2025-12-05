@@ -264,6 +264,106 @@ public class SignalProcessorTests : TestBase
     }
 
     [TestMethod]
+    public async Task CreateSignalProcessor_DuplicateStepIds_Returns400()
+    {
+        // Arrange - two steps with the same Id "step1"
+        var request = new SignalProcessorCreateRequest(
+            "Processor with Duplicate Step IDs",
+            RecomputeTrigger.SignalChange,
+            null,
+            new List<ComputeStepRequest>
+            {
+                new ComputeStepRequest
+                {
+                    Id = "step1",
+                    Operation = new SimpleOperationRequest
+                    {
+                        Action = "+"
+                    },
+                    Inputs = new List<InputDefinitionRequest>
+                    {
+                        new InputDefinitionRequest
+                        {
+                            Name = "a",
+                            DataType = "numeric",
+                            Source = new SignalInputSourceRequest
+                            {
+                                SignalId = NumericSignal1.Id
+                            }
+                        },
+                        new InputDefinitionRequest
+                        {
+                            Name = "b",
+                            DataType = "numeric",
+                            Source = new SignalInputSourceRequest
+                            {
+                                SignalId = NumericSignal2.Id
+                            }
+                        }
+                    },
+                    Outputs = new List<OutputDefinitionRequest>
+                    {
+                        new OutputDefinitionRequest
+                        {
+                            Name = "result",
+                            DataType = "numeric"
+                        }
+                    }
+                },
+                new ComputeStepRequest
+                {
+                    Id = "step1", // duplicate
+                    Operation = new SimpleOperationRequest
+                    {
+                        Action = "*"
+                    },
+                    Inputs = new List<InputDefinitionRequest>
+                    {
+                        new InputDefinitionRequest
+                        {
+                            Name = "a",
+                            DataType = "numeric",
+                            Source = new SignalInputSourceRequest
+                            {
+                                SignalId = NumericSignal1.Id
+                            }
+                        },
+                        new InputDefinitionRequest
+                        {
+                            Name = "b",
+                            DataType = "numeric",
+                            Source = new ConstantInputSourceRequest
+                            {
+                                Value = "2"
+                            }
+                        }
+                    },
+                    Outputs = new List<OutputDefinitionRequest>
+                    {
+                        new OutputDefinitionRequest
+                        {
+                            Name = "result",
+                            DataType = "numeric"
+                        }
+                    }
+                }
+            }
+        );
+
+        // Act
+        var response = await ApiClient.PostAsJsonAsync("/signal-processors", request, JsonSerializerOptions);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
+        Assert.IsNotNull(errorResponse);
+        Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
+        Assert.IsTrue(errorResponse.Errors["ComputeGraph"]
+            .Any(e => e.Contains("unique", StringComparison.OrdinalIgnoreCase)
+                   || e.Contains("Duplicate", StringComparison.OrdinalIgnoreCase)));
+    }
+
+    [TestMethod]
     public async Task CreateSignalProcessor_DuplicateName_Returns400()
     {
         // Arrange - Create first processor

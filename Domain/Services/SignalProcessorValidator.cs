@@ -29,6 +29,31 @@ public class SignalProcessorValidator
         }
     }
 
+    public static void ValidateStepIdsUnique(List<ComputeStep> computeGraph)
+    {
+        if (computeGraph == null || computeGraph.Count == 0)
+        {
+            return;
+        }
+
+        var duplicateIds = computeGraph
+            .GroupBy(s => s.Id)
+            .Where(g => g.Count() > 1)
+            .Select(g => g.Key)
+            .ToList();
+
+        if (duplicateIds.Count > 0)
+        {
+            throw new ValidationException(new Dictionary<string, string[]>
+            {
+                ["ComputeGraph"] = new[]
+                {
+                    $"Compute step IDs must be unique. Duplicates: {string.Join(", ", duplicateIds)}"
+                }
+            });
+        }
+    }
+
     public static void ValidateGraphConnected(List<ComputeStep> computeGraph)
     {
         if (computeGraph == null || computeGraph.Count == 0)
