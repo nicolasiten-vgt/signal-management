@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Api.Controllers;
@@ -19,6 +20,7 @@ public class SignalProcessorOperationTypeController : ControllerBase
     public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
     {
         var operationTypes = await _service.GetAllAsync(cancellationToken);
-        return Ok(operationTypes);
+        var operationTypeDtos = operationTypes.ToDto();
+        return Ok(operationTypeDtos);
     }
 }

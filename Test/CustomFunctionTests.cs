@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
@@ -81,7 +82,7 @@ public class CustomFunctionTests : TestBase
         var response = await ApiClient.PostAsJsonAsync("/custom-functions", request);
         
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-        var created = await response.Content.ReadFromJsonAsync<CustomFunction>(JsonSerializerOptions);
+        var created = await response.Content.ReadFromJsonAsync<CustomFunctionDto>(JsonSerializerOptions);
         Assert.IsNotNull(created);
         Assert.AreEqual(request.Name, created.Name);
         Assert.AreEqual(request.Language, created.Language);
@@ -96,7 +97,7 @@ public class CustomFunctionTests : TestBase
         var response = await ApiClient.GetAsync("/custom-functions");
         
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var customFunctionList = await response.Content.ReadFromJsonAsync<IReadOnlyCollection<CustomFunction>>(JsonSerializerOptions);
+        var customFunctionList = await response.Content.ReadFromJsonAsync<IReadOnlyCollection<CustomFunctionDto>>(JsonSerializerOptions);
         Assert.IsNotNull(customFunctionList);
         Assert.AreEqual(2, customFunctionList.Count);
     }
@@ -107,7 +108,7 @@ public class CustomFunctionTests : TestBase
         var response = await ApiClient.GetAsync($"/custom-functions/{CustomFunction1Id}");
         
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var customFunction = await response.Content.ReadFromJsonAsync<CustomFunction>(JsonSerializerOptions);
+        var customFunction = await response.Content.ReadFromJsonAsync<CustomFunctionDto>(JsonSerializerOptions);
         Assert.IsNotNull(customFunction);
         Assert.AreEqual(CustomFunction1Id, customFunction.Id);
         Assert.AreEqual(CustomFunction1.Name, customFunction.Name);

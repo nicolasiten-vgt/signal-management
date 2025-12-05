@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 
@@ -20,21 +21,24 @@ public class CustomFunctionController : ControllerBase
     public async Task<IActionResult> GetCustomFunctionsAsync(CancellationToken cancellationToken)
     {
         var customFunctions = await _service.GetAllAsync(cancellationToken);
-        return Ok(customFunctions);
+        var customFunctionDtos = customFunctions.ToDto();
+        return Ok(customFunctionDtos);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetCustomFunctionByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var customFunction = await _service.GetByIdAsync(id, cancellationToken);
-        return Ok(customFunction);
+        var customFunctionDto = customFunction.ToDto();
+        return Ok(customFunctionDto);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateCustomFunctionAsync([FromBody] CustomFunctionCreateRequest request, CancellationToken cancellationToken)
     {
         var created = await _service.CreateAsync(request, cancellationToken);
-        return Created($"/custom-functions/{created.Id}", created);
+        var createdDto = created.ToDto();
+        return Created($"/custom-functions/{createdDto.Id}", createdDto);
     }
 
     [HttpDelete("{id:guid}")]

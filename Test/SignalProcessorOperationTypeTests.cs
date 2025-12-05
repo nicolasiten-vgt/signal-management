@@ -2,7 +2,6 @@ using Microsoft.Extensions.DependencyInjection;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
-using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Test;
 

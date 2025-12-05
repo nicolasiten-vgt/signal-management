@@ -1,8 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
-using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Constants;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Models;
@@ -557,7 +557,7 @@ public class SignalProcessorTests : TestBase
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         var processors =
-            await response.Content.ReadFromJsonAsync<IReadOnlyCollection<SignalProcessor>>(JsonSerializerOptions);
+            await response.Content.ReadFromJsonAsync<IReadOnlyCollection<SignalProcessorDto>>(JsonSerializerOptions);
         Assert.IsNotNull(processors);
         Assert.IsTrue(processors.Count > 0);
         Assert.IsTrue(processors.Any(p => p.Name == "Test Processor for GetAll"));
@@ -570,7 +570,7 @@ public class SignalProcessorTests : TestBase
         var createRequest = CreateValidSignalProcessorRequest("Test Processor for GetById");
         var createResponse =
             await ApiClient.PostAsJsonAsync("/signal-processors", createRequest, JsonSerializerOptions);
-        var created = await createResponse.Content.ReadFromJsonAsync<SignalProcessor>(JsonSerializerOptions);
+        var created = await createResponse.Content.ReadFromJsonAsync<SignalProcessorDto>(JsonSerializerOptions);
         Assert.IsNotNull(created);
 
         // Act
@@ -578,7 +578,7 @@ public class SignalProcessorTests : TestBase
 
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var processor = await response.Content.ReadFromJsonAsync<SignalProcessor>(JsonSerializerOptions);
+        var processor = await response.Content.ReadFromJsonAsync<SignalProcessorDto>(JsonSerializerOptions);
         Assert.IsNotNull(processor);
         Assert.AreEqual(created.Id, processor.Id);
         Assert.AreEqual(created.Name, processor.Name);
@@ -591,7 +591,7 @@ public class SignalProcessorTests : TestBase
         var createRequest = CreateValidSignalProcessorRequest("Test Processor for Delete");
         var createResponse =
             await ApiClient.PostAsJsonAsync("/signal-processors", createRequest, JsonSerializerOptions);
-        var created = await createResponse.Content.ReadFromJsonAsync<SignalProcessor>(JsonSerializerOptions);
+        var created = await createResponse.Content.ReadFromJsonAsync<SignalProcessorDto>(JsonSerializerOptions);
         Assert.IsNotNull(created);
 
         // Act

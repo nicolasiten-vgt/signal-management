@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
@@ -62,7 +63,7 @@ public class SignalTests : TestBase
         var response = await ApiClient.PostAsJsonAsync("/signals", request);
         
         Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
-        var created = await response.Content.ReadFromJsonAsync<Signal>(JsonSerializerOptions);
+        var created = await response.Content.ReadFromJsonAsync<SignalDto>(JsonSerializerOptions);
         Assert.IsNotNull(created);
         Assert.AreEqual(request.Id, created.Id);
         Assert.AreEqual(request.Name, created.Name);
@@ -81,7 +82,7 @@ public class SignalTests : TestBase
         var response = await ApiClient.GetAsync("/signals");
         
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var signalList = await response.Content.ReadFromJsonAsync<IReadOnlyCollection<Signal>>(JsonSerializerOptions);
+        var signalList = await response.Content.ReadFromJsonAsync<IReadOnlyCollection<SignalDto>>(JsonSerializerOptions);
         Assert.IsNotNull(signalList);
         Assert.AreEqual(2, signalList.Count);
     }
@@ -92,7 +93,7 @@ public class SignalTests : TestBase
         var response = await ApiClient.GetAsync($"/signals/{Signal1.Id}");
         
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        var signal = await response.Content.ReadFromJsonAsync<Signal>(JsonSerializerOptions);
+        var signal = await response.Content.ReadFromJsonAsync<SignalDto>(JsonSerializerOptions);
         Assert.IsNotNull(signal);
         Assert.AreEqual(Signal1.Id, signal.Id);
     }
