@@ -206,6 +206,33 @@ paths:
           description: Deleted
         "404":
           description: Not found
+  /signal-processors/{id}/invoke:
+    post:
+      summary: Invoke a SignalProcessor with input signals
+      tags:
+        - Signal Processor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignalProcessorInvokeRequest"
+      responses:
+        "200":
+          description: Invocation result per compute step
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SignalProcessorInvokeResult"
+        "404":
+          description: SignalProcessor not found
 components:
   schemas:
     Signal:
@@ -578,3 +605,68 @@ components:
           enum: [signal]
         signalId:
           type: string
+    SignalProcessorInvokeRequest:
+      type: object
+      description: Dictionary of input signals where key is signalId and value is signalValue
+      additionalProperties:
+        type: string
+    SignalProcessorInvokeResult:
+      type: object
+      description: Dictionary keyed by stepId, with invocation result per compute step
+      additionalProperties:
+        $ref: "#/components/schemas/StepInvocationResult"
+    StepInvocationResult:
+      oneOf:
+        - $ref: "#/components/schemas/StepInvocationSuccessResult"
+        - $ref: "#/components/schemas/StepInvocationFailureResult"
+        - $ref: "#/components/schemas/StepInvocationNotRunResult"
+      discriminator:
+        propertyName: type
+        mapping:
+          success: "#/components/schemas/StepInvocationSuccessResult"
+          failure: "#/components/schemas/StepInvocationFailureResult"
+          notRun: "#/components/schemas/StepInvocationNotRunResult"
+    StepInvocationSuccessResult:
+      type: object
+      required:
+        - type
+        - outputValues
+      properties:
+        type:
+          type: string
+          enum: [success]
+        outputValues:
+          type: object
+          description: Dictionary of step output name to its value
+          additionalProperties:
+            type: string
+        logs:
+          type: string
+          nullable: true
+    StepInvocationFailureResult:
+      type: object
+      required:
+        - type
+        - errorMessage
+      properties:
+        type:
+          type: string
+          enum: [failure]
+        errorMessage:
+          type: string
+        logs:
+          type: string
+          nullable: true
+    StepInvocationNotRunResult:
+      type: object
+      required:
+        - type
+        - notRunReason
+      properties:
+        type:
+          type: string
+          enum: [notRun]
+        notRunReason:
+          type: string
+          enum:
+            - failureInDependentStep
