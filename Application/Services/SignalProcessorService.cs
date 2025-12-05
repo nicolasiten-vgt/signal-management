@@ -36,22 +36,31 @@ public class SignalProcessorService : ISignalProcessorService
             computeGraph
         );
 
-        // Validate all signal inputs reference existing signals
+        // Validate all signal inputs reference existing signals and have matching data types
         var signalInputs = signalProcessor.ComputeGraph
             .SelectMany(step => step.Inputs)
             .Where(input => input.Source is SignalInputSource)
-            .Select(input => ((SignalInputSource)input.Source).SignalId)
-            .Distinct()
+            .Select(input => new { Input = input, SignalId = ((SignalInputSource)input.Source).SignalId })
             .ToList();
 
-        foreach (var signalId in signalInputs)
+        foreach (var signalInput in signalInputs)
         {
-            var signal = await _signalRepository.GetByIdAsync(signalId, ct);
+            var signal = await _signalRepository.GetByIdAsync(signalInput.SignalId, ct);
             if (signal == null)
             {
                 throw new ValidationException(new Dictionary<string, string[]>
                 {
-                    ["ComputeGraph"] = new[] { $"Signal input references non-existent signal ID: {signalId}" }
+                    ["ComputeGraph"] = new[] { $"Signal input references non-existent signal ID: {signalInput.SignalId}" }
+                });
+            }
+
+            // Validate data type matches
+            var expectedDataType = signal.DataType.ToString();
+            if (!signalInput.Input.DataType.Equals(expectedDataType, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ValidationException(new Dictionary<string, string[]>
+                {
+                    ["ComputeGraph"] = new[] { $"Signal input '{signalInput.Input.Name}' has data type '{signalInput.Input.DataType}' but signal '{signal.Name}' (ID: {signalInput.SignalId}) has data type '{expectedDataType}'" }
                 });
             }
         }
