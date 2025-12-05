@@ -31,7 +31,7 @@ public class SignalProcessorValidator
 
     public static void ValidateStepIdsUnique(List<ComputeStep> computeGraph)
     {
-        if (computeGraph == null || computeGraph.Count == 0)
+        if (computeGraph.Count == 0)
         {
             return;
         }
@@ -56,7 +56,7 @@ public class SignalProcessorValidator
 
     public static void ValidateGraphConnected(List<ComputeStep> computeGraph)
     {
-        if (computeGraph == null || computeGraph.Count == 0)
+        if (computeGraph.Count == 0)
         {
             return;
         }
@@ -114,7 +114,7 @@ public class SignalProcessorValidator
 
     public static void ValidateGraphAcyclic(List<ComputeStep> computeGraph)
     {
-        if (computeGraph == null || computeGraph.Count == 0)
+        if (computeGraph.Count == 0)
         {
             return;
         }
@@ -168,7 +168,7 @@ public class SignalProcessorValidator
 
     public static void ValidateStepOutputReferences(List<ComputeStep> computeGraph)
     {
-        if (computeGraph == null || computeGraph.Count == 0)
+        if (computeGraph.Count == 0)
         {
             return;
         }
@@ -206,7 +206,7 @@ public class SignalProcessorValidator
 
     public static void ValidateDataTypeMatches(List<ComputeStep> computeGraph)
     {
-        if (computeGraph == null || computeGraph.Count == 0)
+        if (computeGraph.Count == 0)
         {
             return;
         }
