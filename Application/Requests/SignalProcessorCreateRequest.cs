@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Constants;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
@@ -20,12 +21,9 @@ public class ComputeStepRequest
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SimpleOperationRequest), typeDiscriminator: "simple")]
-[JsonDerivedType(typeof(CustomFunctionOperationRequest), typeDiscriminator: "customFunction")]
-public abstract class OperationRequest
-{
-    [Required] public required OperationType Type { get; set; }
-}
+[JsonDerivedType(typeof(SimpleOperationRequest), typeDiscriminator: OperationTypes.Simple)]
+[JsonDerivedType(typeof(CustomFunctionOperationRequest), typeDiscriminator: OperationTypes.CustomFunction)]
+public abstract class OperationRequest;
 
 public class SimpleOperationRequest : OperationRequest
 {
@@ -45,13 +43,10 @@ public class InputDefinitionRequest
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SignalInputSourceRequest), typeDiscriminator: "signal")]
-[JsonDerivedType(typeof(ConstantInputSourceRequest), typeDiscriminator: "constant")]
-[JsonDerivedType(typeof(StepOutputInputSourceRequest), typeDiscriminator: "stepOutput")]
-public abstract class InputSourceRequest
-{
-    [Required] public required InputSourceType Type { get; set; }
-}
+[JsonDerivedType(typeof(SignalInputSourceRequest), typeDiscriminator: InputSourceTypes.Signal)]
+[JsonDerivedType(typeof(ConstantInputSourceRequest), typeDiscriminator: InputSourceTypes.Constant)]
+[JsonDerivedType(typeof(StepOutputInputSourceRequest), typeDiscriminator: InputSourceTypes.StepOutput)]
+public abstract class InputSourceRequest;
 
 public class SignalInputSourceRequest : InputSourceRequest
 {
@@ -77,11 +72,9 @@ public class OutputDefinitionRequest
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SignalOutputTargetRequest), typeDiscriminator: "signal")]
-public abstract class OutputTargetRequest
-{
-    [Required] public required OutputTargetType Type { get; set; }
-}
+[JsonDerivedType(typeof(SignalOutputTargetRequest), typeDiscriminator: OutputTargetTypes.Signal)]
+public abstract class OutputTargetRequest;
+
 
 public class SignalOutputTargetRequest : OutputTargetRequest
 {

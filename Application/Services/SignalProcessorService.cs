@@ -106,12 +106,10 @@ public class SignalProcessorService : ISignalProcessorService
         {
             SimpleOperationRequest simple => new SimpleOperation
             {
-                Type = simple.Type,
                 Action = simple.Action
             },
             CustomFunctionOperationRequest customFunction => new CustomFunctionOperation
             {
-                Type = customFunction.Type,
                 CustomFunctionId = customFunction.CustomFunctionId
             },
             _ => throw new InvalidOperationException($"Unknown operation type: {operationRequest.GetType().Name}")
@@ -134,17 +132,14 @@ public class SignalProcessorService : ISignalProcessorService
         {
             SignalInputSourceRequest signal => new SignalInputSource
             {
-                Type = signal.Type,
                 SignalId = signal.SignalId
             },
             ConstantInputSourceRequest constant => new ConstantInputSource
             {
-                Type = constant.Type,
                 Value = constant.Value
             },
             StepOutputInputSourceRequest stepOutput => new StepOutputInputSource
             {
-                Type = stepOutput.Type,
                 StepId = stepOutput.StepId,
                 StepOutputId = stepOutput.StepOutputId
             },
@@ -168,7 +163,6 @@ public class SignalProcessorService : ISignalProcessorService
         {
             SignalOutputTargetRequest signal => new SignalOutputTarget
             {
-                Type = signal.Type,
                 SignalId = signal.SignalId
             },
             _ => throw new InvalidOperationException($"Unknown output target type: {targetRequest.GetType().Name}")

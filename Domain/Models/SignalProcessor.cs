@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Constants;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Services;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
@@ -7,18 +8,6 @@ public enum RecomputeTrigger
 {
     Interval,
     SignalChange
-}
-
-public enum InputSourceType
-{
-    Signal,
-    Constant,
-    StepOutput
-}
-
-public enum OutputTargetType
-{
-    Signal
 }
 
 public class SignalProcessor
@@ -39,8 +28,8 @@ public class SignalProcessor
 
         // Run all domain validations
         SignalProcessorValidator.ValidateRecomputeIntervalRules(this);
-        SignalProcessorValidator.ValidateGraphConnected(computeGraph);
         SignalProcessorValidator.ValidateGraphAcyclic(computeGraph);
+        SignalProcessorValidator.ValidateGraphConnected(computeGraph);
         SignalProcessorValidator.ValidateStepOutputReferences(computeGraph);
         SignalProcessorValidator.ValidateDataTypeMatches(computeGraph);
     }
@@ -69,12 +58,9 @@ public class ComputeStep
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SimpleOperation), typeDiscriminator: "simple")]
-[JsonDerivedType(typeof(CustomFunctionOperation), typeDiscriminator: "customFunction")]
-public abstract class Operation
-{
-    public required OperationType Type { get; set; }
-}
+[JsonDerivedType(typeof(SimpleOperation), typeDiscriminator: OperationTypes.Simple)]
+[JsonDerivedType(typeof(CustomFunctionOperation), typeDiscriminator: OperationTypes.CustomFunction)]
+public abstract class Operation;
 
 public class SimpleOperation : Operation
 {
@@ -94,13 +80,10 @@ public class InputDefinition
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SignalInputSource), typeDiscriminator: "signal")]
-[JsonDerivedType(typeof(ConstantInputSource), typeDiscriminator: "constant")]
-[JsonDerivedType(typeof(StepOutputInputSource), typeDiscriminator: "stepOutput")]
-public abstract class InputSource
-{
-    public required InputSourceType Type { get; set; }
-}
+[JsonDerivedType(typeof(SignalInputSource), typeDiscriminator: InputSourceTypes.Signal)]
+[JsonDerivedType(typeof(ConstantInputSource), typeDiscriminator: InputSourceTypes.Constant)]
+[JsonDerivedType(typeof(StepOutputInputSource), typeDiscriminator: InputSourceTypes.StepOutput)]
+public abstract class InputSource;
 
 public class SignalInputSource : InputSource
 {
@@ -126,11 +109,8 @@ public class OutputDefinition
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(SignalOutputTarget), typeDiscriminator: "signal")]
-public abstract class OutputTarget
-{
-    public required OutputTargetType Type { get; set; }
-}
+[JsonDerivedType(typeof(SignalOutputTarget), typeDiscriminator: OutputTargetTypes.Signal)]
+public abstract class OutputTarget;
 
 public class SignalOutputTarget : OutputTarget
 {

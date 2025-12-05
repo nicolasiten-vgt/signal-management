@@ -39,30 +39,9 @@ public class SignalProcessorValidator
         var stepIds = computeGraph.Select(s => s.Id).ToHashSet();
         var reachable = new HashSet<string>();
 
-        // Find root steps (steps with no incoming edges from other steps)
-        var roots = new List<ComputeStep>();
-        foreach (var step in computeGraph)
-        {
-            bool hasIncomingEdge = false;
-            foreach (var otherStep in computeGraph)
-            {
-                if (otherStep.Inputs.Any(i => i.Source is StepOutputInputSource sos && sos.StepId == step.Id))
-                {
-                    hasIncomingEdge = true;
-                    break;
-                }
-            }
-            if (!hasIncomingEdge)
-            {
-                roots.Add(step);
-            }
-        }
-
-        // DFS from all roots
-        foreach (var root in roots)
-        {
-            DfsVisit(root, computeGraph, reachable);
-        }
+        // Start DFS from the first step (arbitrary choice)
+        // If the graph is connected, we should reach all nodes from any starting point
+        DfsVisitBidirectional(computeGraph[0], computeGraph, reachable);
 
         if (reachable.Count != stepIds.Count)
         {
@@ -73,7 +52,7 @@ public class SignalProcessorValidator
         }
     }
 
-    private static void DfsVisit(ComputeStep step, List<ComputeStep> allSteps, HashSet<string> reachable)
+    private static void DfsVisitBidirectional(ComputeStep step, List<ComputeStep> allSteps, HashSet<string> reachable)
     {
         if (reachable.Contains(step.Id))
         {
@@ -82,14 +61,27 @@ public class SignalProcessorValidator
 
         reachable.Add(step.Id);
 
-        // Find all steps that depend on this step's outputs
+        // Traverse forward: find all steps that depend on this step's outputs
         foreach (var otherStep in allSteps)
         {
             foreach (var input in otherStep.Inputs)
             {
                 if (input.Source is StepOutputInputSource sos && sos.StepId == step.Id)
                 {
-                    DfsVisit(otherStep, allSteps, reachable);
+                    DfsVisitBidirectional(otherStep, allSteps, reachable);
+                }
+            }
+        }
+
+        // Traverse backward: find all steps that this step depends on
+        foreach (var input in step.Inputs)
+        {
+            if (input.Source is StepOutputInputSource sos)
+            {
+                var dependsOnStep = allSteps.FirstOrDefault(s => s.Id == sos.StepId);
+                if (dependsOnStep != null)
+                {
+                    DfsVisitBidirectional(dependsOnStep, allSteps, reachable);
                 }
             }
         }
