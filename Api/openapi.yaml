@@ -613,6 +613,12 @@ components:
     SignalProcessorInvokeResult:
       type: object
       description: Dictionary keyed by stepId, with invocation result per compute step
+      properties:
+        signalOutputs:
+          type: object
+          description: Dictionary mapping signalId to signalValue
+          additionalProperties:
+            type: string
       additionalProperties:
         $ref: "#/components/schemas/StepInvocationResult"
     StepInvocationResult:
