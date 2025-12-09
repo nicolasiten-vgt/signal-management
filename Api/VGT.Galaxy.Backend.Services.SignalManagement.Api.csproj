@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Application\VGT.Galaxy.Backend.Services.SignalManagement.Application.csproj" />
+      <ProjectReference Include="..\Domain\VGT.Galaxy.Backend.Services.SignalManagement.Domain.csproj" />
       <ProjectReference Include="..\Persistence\VGT.Galaxy.Backend.Services.SignalManagement.Persistence.csproj" />
     </ItemGroup>
 

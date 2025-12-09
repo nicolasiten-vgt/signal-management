@@ -1,6 +1,6 @@
 ﻿namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.Constants;
 
-public class OperationTypes
+public static class OperationTypes
 {
     public const string Simple = "simple";
     

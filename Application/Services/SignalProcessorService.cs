@@ -1,6 +1,7 @@
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Exceptions;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.SignalProcessing;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Repositories;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
@@ -9,11 +10,16 @@ public class SignalProcessorService : ISignalProcessorService
 {
     private readonly ISignalProcessorRepository _repository;
     private readonly ISignalRepository _signalRepository;
+    private readonly ISignalProcessorOperationRegistry _operationRegistry;
 
-    public SignalProcessorService(ISignalProcessorRepository repository, ISignalRepository signalRepository)
+    public SignalProcessorService(
+        ISignalProcessorRepository repository,
+        ISignalRepository signalRepository,
+        ISignalProcessorOperationRegistry operationRegistry)
     {
         _repository = repository;
         _signalRepository = signalRepository;
+        _operationRegistry = operationRegistry;
     }
 
     public async Task<SignalProcessor> CreateAsync(SignalProcessorCreateRequest request, CancellationToken ct)
@@ -91,6 +97,89 @@ public class SignalProcessorService : ISignalProcessorService
         {
             throw new NotFoundException(nameof(SignalProcessor), id);
         }
+    }
+
+    public async Task<SignalProcessorExecutionResult> InvokeAsync(string id, IDictionary<string, string> signalInputs, CancellationToken ct)
+    {
+        var signalProcessor = await GetByIdAsync(id, ct);
+        await ValidateInputSignals(signalProcessor, signalInputs, ct);
+
+        var executor = new SignalProcessorExecutor(_operationRegistry);
+        var result = await executor.ExecuteAsync(signalProcessor, signalInputs, ct);
+
+        return result;
+    }
+
+    private async Task ValidateInputSignals(
+        SignalProcessor signalProcessor,
+        IDictionary<string, string> providedInputs,
+        CancellationToken ct)
+    {
+        // Find all signal inputs referenced in the compute graph
+        var signalInputs = signalProcessor.ComputeGraph
+            .SelectMany(step => step.Inputs)
+            .Where(input => input.Source is SignalInputSource)
+            .Select(input => new
+            {
+                Input = input,
+                SignalId = ((SignalInputSource)input.Source).SignalId
+            })
+            .ToList();
+
+        var errors = new Dictionary<string, List<string>>();
+
+        foreach (var signalInput in signalInputs)
+        {
+            // Check if the signal value is provided
+            if (!providedInputs.ContainsKey(signalInput.SignalId))
+            {
+                if (!errors.ContainsKey("InputSignals"))
+                {
+                    errors["InputSignals"] = new List<string>();
+                }
+                errors["InputSignals"].Add($"Missing required input signal: {signalInput.SignalId}");
+                continue;
+            }
+
+            // Get the signal definition to validate the data type
+            var signal = await _signalRepository.GetByIdAsync(signalInput.SignalId, ct);
+            if (signal == null)
+            {
+                if (!errors.ContainsKey("InputSignals"))
+                {
+                    errors["InputSignals"] = new List<string>();
+                }
+                errors["InputSignals"].Add($"Signal {signalInput.SignalId} not found");
+                continue;
+            }
+
+            // Validate the data type
+            string providedValue = providedInputs[signalInput.SignalId];
+            if (!ValidateDataType(signal.DataType.ToString(), providedValue))
+            {
+                if (!errors.ContainsKey("InputSignals"))
+                {
+                    errors["InputSignals"] = new List<string>();
+                }
+                errors["InputSignals"].Add(
+                    $"Invalid value '{providedValue}' for signal {signalInput.SignalId} (expected {signal.DataType})");
+            }
+        }
+
+        if (errors.Count > 0)
+        {
+            throw new ValidationException(errors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray()));
+        }
+    }
+
+    private bool ValidateDataType(string dataType, string value)
+    {
+        return dataType.ToLower() switch
+        {
+            "numeric" => decimal.TryParse(value, out _),
+            "string" => true, 
+            _ => true 
+        };
     }
 
     private static List<ComputeStep> MapComputeGraph(List<ComputeStepRequest> computeGraphRequest)

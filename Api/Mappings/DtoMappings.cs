@@ -1,5 +1,6 @@
 using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.SignalProcessing;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 
@@ -179,6 +180,40 @@ public static class DtoMappings
         {
             Name = parameter.Name,
             DataType = parameter.DataType
+        };
+    }
+
+    // SignalProcessorExecutionResult mappings
+    public static SignalProcessorInvokeResultDto ToDto(this SignalProcessorExecutionResult result)
+    {
+        return new SignalProcessorInvokeResultDto
+        {
+            SignalOutputs = result.SignalOutputs.Count > 0 ? result.SignalOutputs : null,
+            StepResults = result.StepResults.ToDictionary(
+                kvp => kvp.Key,
+                kvp => kvp.Value.ToDto())
+        };
+    }
+
+    private static StepInvocationResultDto ToDto(this StepExecutionResult stepResult)
+    {
+        return stepResult switch
+        {
+            StepExecutionSuccess success => new StepInvocationSuccessResultDto
+            {
+                OutputValues = success.OutputValues,
+                Logs = success.Logs
+            },
+            StepExecutionFailure failure => new StepInvocationFailureResultDto
+            {
+                ErrorMessage = failure.ErrorMessage,
+                Logs = failure.Logs
+            },
+            StepExecutionNotRun notRun => new StepInvocationNotRunResultDto
+            {
+                NotRunReason = notRun.Reason
+            },
+            _ => throw new InvalidOperationException($"Unknown step execution result type: {stepResult.GetType().Name}")
         };
     }
 }

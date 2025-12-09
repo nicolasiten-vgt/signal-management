@@ -47,4 +47,12 @@ public class SignalProcessorController : ControllerBase
         await _service.DeleteAsync(id, cancellationToken);
         return NoContent();
     }
+
+    [HttpPost("{id}/invoke")]
+    public async Task<IActionResult> InvokeSignalProcessorAsync(string id, [FromBody] IDictionary<string, string> signalInputs, CancellationToken cancellationToken)
+    {
+        var result = await _service.InvokeAsync(id, signalInputs, cancellationToken);
+        var resultDto = result.ToDto();
+        return Ok(resultDto);
+    }
 }

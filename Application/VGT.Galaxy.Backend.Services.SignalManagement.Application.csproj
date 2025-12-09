@@ -11,4 +11,8 @@
       <ProjectReference Include="..\Persistence\VGT.Galaxy.Backend.Services.SignalManagement.Persistence.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.ClearScript.V8" Version="7.5.0" />
+    </ItemGroup>
+
 </Project>
