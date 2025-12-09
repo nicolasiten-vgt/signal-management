@@ -25,9 +25,7 @@ public class SignalProcessorExecutor
         {
             try
             {
-                bool canRun = CanStepRun(step, stepResults);
-                
-                if (!canRun)
+                if (!CanStepRun(step, stepResults))
                 {
                     stepResults[step.Id] = new StepExecutionNotRun
                     {
