@@ -2,7 +2,6 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 
 public enum ProgrammingLanguage
 {
-    Csharp,
     JavaScript
 }
 

@@ -19,7 +19,7 @@ public class CustomFunctionTests : TestBase
     {
         Id = CustomFunction1Id,
         Name = "Add Two Numbers",
-        Language = ProgrammingLanguage.Csharp,
+        Language = ProgrammingLanguage.JavaScript,
         InputParameters = new List<ParameterDefinition>
         {
             new() { Name = "a", DataType = "numeric" },
@@ -29,7 +29,7 @@ public class CustomFunctionTests : TestBase
         {
             new() { Name = "result", DataType = "numeric" }
         },
-        SourceCode = "return new Dictionary<string, object> { [\"result\"] = (decimal)inputs[\"a\"] + (decimal)inputs[\"b\"] };",
+        SourceCode = "return { result: Number(inputs.a) + Number(inputs.b) };",
         Dependencies = null
     };
     
@@ -66,7 +66,7 @@ public class CustomFunctionTests : TestBase
     {
         var request = new CustomFunctionCreateRequest(
             "Multiply Two Numbers",
-            ProgrammingLanguage.Csharp,
+            ProgrammingLanguage.JavaScript,
             new List<ParameterDefinition>
             {
                 new() { Name = "x", DataType = "numeric" },
@@ -76,7 +76,7 @@ public class CustomFunctionTests : TestBase
             {
                 new() { Name = "product", DataType = "numeric" }
             },
-            "return new Dictionary<string, object> { [\"product\"] = (decimal)inputs[\"x\"] * (decimal)inputs[\"y\"] };",
+            "return { product: Number(inputs.x) * Number(inputs.y) };",
             null);
 
         var response = await ApiClient.PostAsJsonAsync("/custom-functions", request);

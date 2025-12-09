@@ -322,7 +322,7 @@ components:
           type: string
         language:
           type: string
-          enum: [Csharp, JavaScript]
+          enum: [JavaScript]
         inputParameters:
           type: array
           items:
@@ -347,7 +347,7 @@ components:
           type: string
         language:
           type: string
-          enum: [Csharp, JavaScript]
+          enum: [JavaScript]
         inputParameters:
           type: array
           items:

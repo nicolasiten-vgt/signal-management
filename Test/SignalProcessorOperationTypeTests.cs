@@ -60,7 +60,7 @@ public class SignalProcessorOperationTypeTests : TestBase
         // Arrange - Create a custom function
         CustomFunctionCreateRequest createRequest = new(
             Name: "TestCustomFunction",
-            Language: ProgrammingLanguage.Csharp,
+            Language: ProgrammingLanguage.JavaScript,
             InputParameters: new List<ParameterDefinition>
             {
                 new() { Name = "a", DataType = "numeric" }
