@@ -6,6 +6,7 @@ using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Models;
+using VGT.Galaxy.Backend.Services.SignalManagement.Test.Helpers;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Test;
 
@@ -72,82 +73,22 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest
-                            {
-                                StepId = "step2",
-                                StepOutputId = "result"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                },
-                new ComputeStepRequest
-                {
-                    Id = "step2",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "*"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest
-                            {
-                                StepId = "step1",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "2"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("b", "numeric", "step2", "result")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),                
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step2", "*",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "numeric", "step1", "result"),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "2")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
             }
         );
 
@@ -156,8 +97,6 @@ public class SignalProcessorTests : TestBase
 
         // Assert
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
-        var responseContent = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"Raw error response: {responseContent}");
         var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
         Assert.IsNotNull(errorResponse);
         Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
@@ -175,80 +114,22 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "10"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                },
-                new ComputeStepRequest
-                {
-                    Id = "step2",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "*"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal2.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "5"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "10")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step2", "*",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal2.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "5")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
             }
         );
 
@@ -273,80 +154,22 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal2.Id
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                },
-                new ComputeStepRequest
-                {
-                    Id = "step1", // duplicate
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "*"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "2"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "*",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "2")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
             }
         );
 
@@ -393,43 +216,14 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = "non-existent-signal-id"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "10"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", "non-existent-signal-id"),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "10")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
             }
         );
 
@@ -455,81 +249,22 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "10"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                },
-                new ComputeStepRequest
-                {
-                    Id = "step2",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "*"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest
-                            {
-                                StepId = "step1",
-                                StepOutputId = "non_existent_output"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "2"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "10")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),                
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step2", "*",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "numeric", "step1", "non_existent_output"), // invalid output reference
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "2")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
             }
         );
 
@@ -555,81 +290,22 @@ public class SignalProcessorTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "10"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                },
-                new ComputeStepRequest
-                {
-                    Id = "step2",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = ">"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "boolean", // Wrong data type - expecting numeric from step1
-                            Source = new StepOutputInputSourceRequest
-                            {
-                                StepId = "step1",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest
-                            {
-                                Value = "100"
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "boolean"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "10")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),        
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step2", ">",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "string", "step1", "result"), // wrong datatype
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "100")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),            
             }
         );
 
@@ -711,53 +387,14 @@ public class SignalProcessorTests : TestBase
             name,
             RecomputeTrigger.SignalChange,
             null,
-            new List<ComputeStepRequest>
-            {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal2.Id
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric",
-                            Targets = new List<OutputTargetRequest>
-                            {
-                                new SignalOutputTargetRequest
-                                {
-                                    SignalId = NumericSignal1.Id
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            [SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                [
+                    SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                    SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                ],
+                [
+                    SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                ])]
         );
     }
 
