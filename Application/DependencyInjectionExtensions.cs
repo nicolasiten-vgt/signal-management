@@ -13,6 +13,6 @@ public static class DependencyInjectionExtensions
             .AddTransient<ICustomFunctionService, CustomFunctionService>()
             .AddTransient<ISignalProcessorOperationTypeService, SignalProcessorOperationTypeService>()
             .AddTransient<ISignalProcessorService, SignalProcessorService>()
-            .AddSingleton<ISignalProcessorOperationRegistry, SignalProcessorOperationRegistry>();
+            .AddTransient<ISignalProcessorOperationRegistry, SignalProcessorOperationRegistry>();
     }
 }

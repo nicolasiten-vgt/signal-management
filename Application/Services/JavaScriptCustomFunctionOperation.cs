@@ -1,9 +1,10 @@
 using System.Text.Json;
 using Microsoft.ClearScript.V8;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.SignalProcessing;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 
-public class JavaScriptCustomFunctionOperation : Domain.SignalProcessing.ISignalProcessorOperation
+public class JavaScriptCustomFunctionOperation : ISignalProcessorOperation
 {
     private readonly string _sourceCode;
 
@@ -15,10 +16,13 @@ public class JavaScriptCustomFunctionOperation : Domain.SignalProcessing.ISignal
     public IDictionary<string, string> Execute(IDictionary<string, string> inputs)
     {
         using var engine = new V8ScriptEngine();
-        engine.Execute(_sourceCode);
-        
-        string input = JsonSerializer.Serialize(inputs);
-        var jsResult = engine.Script.run(input);
+        engine.Script.jsonInput = JsonSerializer.Serialize(inputs);
+        var jsResult = engine.Evaluate($$"""
+         (function (json) {
+            const inputs = JSON.parse(json);
+            {{_sourceCode}}
+         })(jsonInput)
+         """);
         
         if (jsResult is Microsoft.ClearScript.ScriptObject scriptObject)
         {

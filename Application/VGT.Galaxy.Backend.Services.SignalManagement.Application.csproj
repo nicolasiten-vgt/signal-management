@@ -13,6 +13,8 @@
 
     <ItemGroup>
       <PackageReference Include="Microsoft.ClearScript.V8" Version="7.5.0" />
+      <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.5.0" />
+      <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.5.0" />
     </ItemGroup>
 
 </Project>

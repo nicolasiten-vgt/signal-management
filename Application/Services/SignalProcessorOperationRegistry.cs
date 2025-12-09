@@ -42,13 +42,12 @@ public class SignalProcessorOperationRegistry : ISignalProcessorOperationRegistr
         {
             throw new NotFoundException("CustomFunction", customFunctionId.ToString());
         }
-
-        // For now, only JavaScript is supported
-        if (customFunction.Language != Domain.Models.ProgrammingLanguage.JavaScript)
+        
+        return customFunction.Language switch
         {
-            throw new ArgumentException($"Unsupported custom function language: {customFunction.Language}. Only JavaScript is supported.");
-        }
-
-        return new JavaScriptCustomFunctionOperation(customFunction.SourceCode);
+            Domain.Models.ProgrammingLanguage.JavaScript => new JavaScriptCustomFunctionOperation(customFunction
+                .SourceCode),
+            _ => throw new ArgumentException($"Unsupported custom function language: {customFunction.Language}.")
+        };
     }
 }
