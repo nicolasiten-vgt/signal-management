@@ -48,7 +48,7 @@ public class SimpleOperationTypeRepository : ISimpleOperationTypeRepository
             },
             OutputParameters = new List<Parameter>
             {
-                new Parameter { Name = "result", DataType = "numeric" }
+                new Parameter { Name = "result", DataType = "string" }
             }
         },
         new SignalProcessorOperationType
@@ -63,7 +63,7 @@ public class SimpleOperationTypeRepository : ISimpleOperationTypeRepository
             },
             OutputParameters = new List<Parameter>
             {
-                new Parameter { Name = "result", DataType = "numeric" }
+                new Parameter { Name = "result", DataType = "string" }
             }
         }
     };

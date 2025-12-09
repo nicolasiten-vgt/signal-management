@@ -319,6 +319,138 @@ public class SignalProcessorTests : TestBase
         Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
         Assert.IsTrue(errorResponse.Errors["ComputeGraph"].Any(e => e.Contains("mismatch") || e.Contains("type")));
     }
+    
+    [TestMethod]
+    public async Task CreateSignalProcessor_ExtraOutputNotDefined_Returns400()
+    {
+        // Arrange - "+" operation outputs "result", but we define "result" and "extra"
+        var request = new SignalProcessorCreateRequest(
+            "Processor with Extra Output",
+            RecomputeTrigger.SignalChange,
+            null,
+            new List<ComputeStepRequest>
+            {
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric"),
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("extra", "numeric") // Extra output not defined by operation
+                    ])
+            }
+        );
+
+        // Act
+        var response = await ApiClient.PostAsJsonAsync("/signal-processors", request, JsonSerializerOptions);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
+        Assert.IsNotNull(errorResponse);
+        Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
+        Assert.IsTrue(errorResponse.Errors["ComputeGraph"].Any(e => e.Contains("not defined by the operation") && e.Contains("extra")));
+    }
+
+    [TestMethod]
+    public async Task CreateSignalProcessor_StepInputDataTypeMismatch_Returns400()
+    {
+        // Arrange - "+" operation expects input "a" to be "numeric", but we define it as "string"
+        var request = new SignalProcessorCreateRequest(
+            "Processor with Input Data Type Mismatch",
+            RecomputeTrigger.SignalChange,
+            null,
+            new List<ComputeStepRequest>
+            {
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "string", StringSignal.Id), // Wrong data type
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
+            }
+        );
+
+        // Act
+        var response = await ApiClient.PostAsJsonAsync("/signal-processors", request, JsonSerializerOptions);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
+        Assert.IsNotNull(errorResponse);
+        Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
+        Assert.IsTrue(errorResponse.Errors["ComputeGraph"].Any(e => 
+            e.Contains("data type") && e.Contains("string") && e.Contains("numeric")));
+    }
+
+    [TestMethod]
+    public async Task CreateSignalProcessor_StepOutputDataTypeMismatch_Returns400()
+    {
+        // Arrange - "+" operation outputs "result" as "numeric", but we define it as "string"
+        var request = new SignalProcessorCreateRequest(
+            "Processor with Output Data Type Mismatch",
+            RecomputeTrigger.SignalChange,
+            null,
+            new List<ComputeStepRequest>
+            {
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "string") // Wrong data type
+                    ])
+            }
+        );
+
+        // Act
+        var response = await ApiClient.PostAsJsonAsync("/signal-processors", request, JsonSerializerOptions);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
+        Assert.IsNotNull(errorResponse);
+        Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
+        Assert.IsTrue(errorResponse.Errors["ComputeGraph"].Any(e => 
+            e.Contains("data type") && e.Contains("string") && e.Contains("numeric")));
+    }
+    
+    [TestMethod]
+    public async Task CreateSignalProcessor_ExtraInputNotDefined_Returns400()
+    {
+        // Arrange - "+" operation expects inputs "a" and "b", but we define "a", "b", and "c"
+        var request = new SignalProcessorCreateRequest(
+            "Processor with Extra Input",
+            RecomputeTrigger.SignalChange,
+            null,
+            new List<ComputeStepRequest>
+            {
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("c", "numeric", "10") // Extra input not defined by operation
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ])
+            }
+        );
+
+        // Act
+        var response = await ApiClient.PostAsJsonAsync("/signal-processors", request, JsonSerializerOptions);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+        var errorResponse = await response.Content.ReadFromJsonAsync<ValidationErrorResponse>(JsonSerializerOptions);
+        Assert.IsNotNull(errorResponse);
+        Assert.IsTrue(errorResponse.Errors.ContainsKey("ComputeGraph"));
+        Assert.IsTrue(errorResponse.Errors["ComputeGraph"].Any(e => e.Contains("not defined by the operation") && e.Contains("c")));
+    }    
 
     [TestMethod]
     public async Task GetAllSignalProcessors_WithExistingProcessors_ReturnsProcessors()
@@ -380,7 +512,7 @@ public class SignalProcessorTests : TestBase
         var getResponse = await ApiClient.GetAsync($"/signal-processors/{created.Id}");
         Assert.AreEqual(HttpStatusCode.NotFound, getResponse.StatusCode);
     }
-
+    
     private static SignalProcessorCreateRequest CreateValidSignalProcessorRequest(string name)
     {
         return new SignalProcessorCreateRequest(

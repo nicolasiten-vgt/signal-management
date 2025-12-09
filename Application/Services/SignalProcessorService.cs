@@ -11,15 +11,18 @@ public class SignalProcessorService : ISignalProcessorService
     private readonly ISignalProcessorRepository _repository;
     private readonly ISignalRepository _signalRepository;
     private readonly ISignalProcessorOperationRegistry _operationRegistry;
+    private readonly ISignalProcessorOperationTypeService _operationTypeService;
 
     public SignalProcessorService(
         ISignalProcessorRepository repository,
         ISignalRepository signalRepository,
-        ISignalProcessorOperationRegistry operationRegistry)
+        ISignalProcessorOperationRegistry operationRegistry,
+        ISignalProcessorOperationTypeService operationTypeService)
     {
         _repository = repository;
         _signalRepository = signalRepository;
         _operationRegistry = operationRegistry;
+        _operationTypeService = operationTypeService;
     }
 
     public async Task<SignalProcessor> CreateAsync(SignalProcessorCreateRequest request, CancellationToken ct)
@@ -35,12 +38,14 @@ public class SignalProcessorService : ISignalProcessorService
         }
 
         var computeGraph = MapComputeGraph(request.ComputeGraph);
+        
+        var operationTypes = await _operationTypeService.GetAllAsync(ct);
         var signalProcessor = new SignalProcessor(
             request.Name,
             request.RecomputeTrigger!.Value,
             request.RecomputeIntervalSec,
-            computeGraph
-        );
+            computeGraph,
+            operationTypes);
 
         // Validate all signal inputs reference existing signals and have matching data types
         var signalInputs = signalProcessor.ComputeGraph

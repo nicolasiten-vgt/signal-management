@@ -3,7 +3,7 @@ using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.Services;
 
-public class SignalProcessorValidator
+public static class SignalProcessorValidator
 {
     public static void ValidateRecomputeIntervalRules(SignalProcessor processor)
     {
@@ -237,6 +237,151 @@ public class SignalProcessorValidator
                             });
                         }
                     }
+                }
+            }
+        }
+    }
+
+    public static void ValidateStepOperationDefinitions(
+        List<ComputeStep> computeGraph,
+        IReadOnlyCollection<SignalProcessorOperationType> operationTypes)
+    {
+        if (computeGraph.Count == 0)
+        {
+            return;
+        }
+
+        foreach (ComputeStep step in computeGraph)
+        {
+            // 1. Resolve operation type
+            SignalProcessorOperationType? operationType = step.Operation switch
+            {
+                SimpleOperation simple => operationTypes.FirstOrDefault(t =>
+                    t.Type == OperationType.Simple &&
+                    string.Equals(t.Name, simple.Action, StringComparison.OrdinalIgnoreCase)),
+                CustomFunctionOperation custom => operationTypes.FirstOrDefault(t =>
+                    t.Type == OperationType.CustomFunction &&
+                    t.Id == custom.CustomFunctionId),
+                _ => null
+            };
+
+            if (operationType == null)
+            {
+                string operationDescription = step.Operation switch
+                {
+                    SimpleOperation simple => $"simple operation '{simple.Action}'",
+                    CustomFunctionOperation custom => $"custom function with ID '{custom.CustomFunctionId}'",
+                    _ => "unknown operation"
+                };
+                
+                throw new ValidationException(new Dictionary<string, string[]>
+                {
+                    ["ComputeGraph"] = new[]
+                    {
+                        $"Step '{step.Id}': Operation definition not found for {operationDescription}."
+                    }
+                });
+            }
+
+            // 2. Validate inputs
+            var parameterInputs = operationType.InputParameters
+                .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (InputDefinition input in step.Inputs)
+            {
+                // Check if input is defined by the operation
+                if (!parameterInputs.TryGetValue(input.Name, out Parameter? param))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Input '{input.Name}' is not defined by the operation '{operationType.Name}'."
+                        }
+                    });
+                }
+
+                // Check data type match (case-insensitive)
+                if (!string.Equals(input.DataType, param.DataType, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Input '{input.Name}' has data type '{input.DataType}' " +
+                            $"but operation '{operationType.Name}' expects '{param.DataType}'."
+                        }
+                    });
+                }
+            }
+
+            // Check for missing required inputs
+            var definedInputNames = new HashSet<string>(
+                step.Inputs.Select(i => i.Name),
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (Parameter param in operationType.InputParameters)
+            {
+                if (!definedInputNames.Contains(param.Name))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Required input '{param.Name}' is missing for operation '{operationType.Name}'."
+                        }
+                    });
+                }
+            }
+
+            // 3. Validate outputs
+            var parameterOutputs = operationType.OutputParameters
+                .ToDictionary(p => p.Name, StringComparer.OrdinalIgnoreCase);
+
+            foreach (OutputDefinition output in step.Outputs)
+            {
+                // Check if output is defined by the operation
+                if (!parameterOutputs.TryGetValue(output.Name, out Parameter? param))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Output '{output.Name}' is not defined by the operation '{operationType.Name}'."
+                        }
+                    });
+                }
+
+                // Check data type match (case-insensitive)
+                if (!string.Equals(output.DataType, param.DataType, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Output '{output.Name}' has data type '{output.DataType}' " +
+                            $"but operation '{operationType.Name}' expects '{param.DataType}'."
+                        }
+                    });
+                }
+            }
+
+            // Check for missing required outputs
+            var definedOutputNames = new HashSet<string>(
+                step.Outputs.Select(o => o.Name),
+                StringComparer.OrdinalIgnoreCase);
+
+            foreach (Parameter param in operationType.OutputParameters)
+            {
+                if (!definedOutputNames.Contains(param.Name))
+                {
+                    throw new ValidationException(new Dictionary<string, string[]>
+                    {
+                        ["ComputeGraph"] = new[]
+                        {
+                            $"Step '{step.Id}': Required output '{param.Name}' is missing for operation '{operationType.Name}'."
+                        }
+                    });
                 }
             }
         }

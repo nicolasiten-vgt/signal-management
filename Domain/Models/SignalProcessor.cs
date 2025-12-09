@@ -18,7 +18,12 @@ public class SignalProcessor
     public int? RecomputeIntervalSec { get; private set; }
     public List<ComputeStep> ComputeGraph { get; private set; }
 
-    public SignalProcessor(string name, RecomputeTrigger recomputeTrigger, int? recomputeIntervalSec, List<ComputeStep> computeGraph)
+    public SignalProcessor(
+        string name, 
+        RecomputeTrigger recomputeTrigger, 
+        int? recomputeIntervalSec, 
+        List<ComputeStep> computeGraph,
+        IReadOnlyCollection<SignalProcessorOperationType> availableOperationTypes)
     {
         Id = Guid.NewGuid();
         Name = name;
@@ -27,6 +32,7 @@ public class SignalProcessor
         ComputeGraph = computeGraph;
 
         // Run all domain validations
+        SignalProcessorValidator.ValidateStepOperationDefinitions(computeGraph, availableOperationTypes);
         SignalProcessorValidator.ValidateRecomputeIntervalRules(this);
         SignalProcessorValidator.ValidateStepIdsUnique(computeGraph);
         SignalProcessorValidator.ValidateGraphAcyclic(computeGraph);
