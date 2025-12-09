@@ -6,6 +6,7 @@ using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Models;
+using VGT.Galaxy.Backend.Services.SignalManagement.Test.Helpers;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Test;
 
@@ -176,48 +177,15 @@ public class SignalProcessorInvokeTests : TestBase
             null,
             new List<ComputeStepRequest>
             {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new CustomFunctionOperationRequest
-                    {
-                        CustomFunctionId = CustomFunctionId
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "x",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "y",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal2.Id
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "product",
-                            DataType = "numeric"
-                        },
-                        new OutputDefinitionRequest
-                        {
-                            Name = "sum",
-                            DataType = "numeric"
-                        }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateCustomFunctionStep("step1", CustomFunctionId,
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("x", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("y", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("product", "numeric"),
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("sum", "numeric")
+                    ])
             }
         );
 
@@ -269,150 +237,51 @@ public class SignalProcessorInvokeTests : TestBase
             new List<ComputeStepRequest>
             {
                 // Step 1: Add signal1 + signal2
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest { Action = "+" },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest { SignalId = NumericSignal1.Id }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest { SignalId = NumericSignal2.Id }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest { Name = "result", DataType = "numeric" }
-                    }
-                },
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),
                 // Step 2: Multiply temp1 * signal3
-                new ComputeStepRequest
-                {
-                    Id = "step2",
-                    Operation = new SimpleOperationRequest { Action = "*" },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest 
-                            { 
-                                StepId = "step1",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest { SignalId = NumericSignal3.Id }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest { Name = "result", DataType = "numeric" }
-                    }
-                },
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step2", "*",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "numeric", "step1", "result"),
+                        SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal3.Id)
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),                
                 // Step 3: Check if temp2 > 100
-                new ComputeStepRequest
-                {
-                    Id = "step3",
-                    Operation = new SimpleOperationRequest { Action = ">" },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest 
-                            { 
-                                StepId = "step2",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest { Value = "100" }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest { Name = "result", DataType = "boolean" }
-                    }
-                },
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step3", ">",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "numeric", "step2", "result"),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "100")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "string")
+                    ]),                
                 // Step 4: Subtract temp2 - 50
-                new ComputeStepRequest
-                {
-                    Id = "step4",
-                    Operation = new SimpleOperationRequest { Action = "+" },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest 
-                            { 
-                                StepId = "step2",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest { Value = "-50" }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest { Name = "result", DataType = "numeric" }
-                    }
-                },
+                SignalProcessorComputeStepFactory.CreateSimpleStep("step4", "+",
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("a", "numeric", "step2", "result"),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("b", "numeric", "-50")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                    ]),                    
                 // Step 5: Custom function (multiply and add) using temp3 and constant
-                new ComputeStepRequest
-                {
-                    Id = "step5",
-                    Operation = new CustomFunctionOperationRequest
-                    {
-                        CustomFunctionId = CustomFunctionId
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "x",
-                            DataType = "numeric",
-                            Source = new StepOutputInputSourceRequest 
-                            { 
-                                StepId = "step4",
-                                StepOutputId = "result"
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "y",
-                            DataType = "numeric",
-                            Source = new ConstantInputSourceRequest { Value = "2" }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest { Name = "product", DataType = "numeric" },
-                        new OutputDefinitionRequest { Name = "sum", DataType = "numeric" }
-                    }
-                }
+                SignalProcessorComputeStepFactory.CreateCustomFunctionStep("step5", CustomFunctionId,
+                    [
+                        SignalProcessorInputDefinitionFactory.CreateStepOutputInput("x", "numeric", "step4", "result"),
+                        SignalProcessorInputDefinitionFactory.CreateConstantInput("y", "numeric", "2")
+                    ],
+                    [
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("product", "numeric"),
+                        SignalProcessorOutputDefinitionFactory.CreateOutput("sum", "numeric")
+                    ])
             }
         );
 
@@ -475,46 +344,14 @@ public class SignalProcessorInvokeTests : TestBase
             "Simple Add Processor",
             RecomputeTrigger.SignalChange,
             null,
-            new List<ComputeStepRequest>
-            {
-                new ComputeStepRequest
-                {
-                    Id = "step1",
-                    Operation = new SimpleOperationRequest
-                    {
-                        Action = "+"
-                    },
-                    Inputs = new List<InputDefinitionRequest>
-                    {
-                        new InputDefinitionRequest
-                        {
-                            Name = "a",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal1.Id
-                            }
-                        },
-                        new InputDefinitionRequest
-                        {
-                            Name = "b",
-                            DataType = "numeric",
-                            Source = new SignalInputSourceRequest
-                            {
-                                SignalId = NumericSignal2.Id
-                            }
-                        }
-                    },
-                    Outputs = new List<OutputDefinitionRequest>
-                    {
-                        new OutputDefinitionRequest
-                        {
-                            Name = "result",
-                            DataType = "numeric"
-                        }
-                    }
-                }
-            }
+            [SignalProcessorComputeStepFactory.CreateSimpleStep("step1", "+",
+                [
+                    SignalProcessorInputDefinitionFactory.CreateSignalInput("a", "numeric", NumericSignal1.Id),
+                    SignalProcessorInputDefinitionFactory.CreateSignalInput("b", "numeric", NumericSignal2.Id)
+                ],
+                [
+                    SignalProcessorOutputDefinitionFactory.CreateOutput("result", "numeric")
+                ])]
         );
 
         var response = await ApiClient.PostAsJsonAsync("/signal-processors", createRequest, JsonSerializerOptions);
