@@ -21,7 +21,9 @@ public class SignalProcessorOperationTypeService : ISignalProcessorOperationType
         var simpleOperations = await _simpleOperationTypeRepository.GetAllAsync();
         var customFunctions = await _customFunctionService.GetAllAsync(ct);
 
-        var signalProcessorOperationTypes = new SignalProcessorOperationTypes(simpleOperations, customFunctions);
+        var signalProcessorOperationTypes = new SignalProcessorOperationTypes(
+            simpleOperations.Select(so => so.OperationType).ToArray(), 
+            customFunctions);
         return signalProcessorOperationTypes.All;
     }
 }

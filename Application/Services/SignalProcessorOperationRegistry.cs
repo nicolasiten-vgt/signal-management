@@ -8,25 +8,21 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 public class SignalProcessorOperationRegistry : ISignalProcessorOperationRegistry
 {
     private readonly ICustomFunctionRepository _customFunctionRepository;
-    private readonly Dictionary<string, ISignalProcessorOperation> _simpleOperations;
+    private readonly Dictionary<string, ISignalProcessorSimpleOperation> _simpleOperations;
 
     public SignalProcessorOperationRegistry(ICustomFunctionRepository customFunctionRepository)
     {
         _customFunctionRepository = customFunctionRepository;
-        
-        // Register all simple operations
-        _simpleOperations = new Dictionary<string, ISignalProcessorOperation>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["+"] = new AddOperation(),
-            ["*"] = new MultiplyOperation(),
-            [">"] = new BiggerThanOperation(),
-            ["<"] = new LessThanOperation()
-        };
+        _simpleOperations = SignalProcessorSimpleOperations
+            .All
+            .ToDictionary(
+                key => key.OperationType.Name, 
+                element => element);
     }
 
     public ISignalProcessorOperation GetSimpleOperation(string action)
     {
-        if (_simpleOperations.TryGetValue(action, out ISignalProcessorOperation? operation))
+        if (_simpleOperations.TryGetValue(action, out var operation))
         {
             return operation;
         }

@@ -1,9 +1,26 @@
-﻿using System.Globalization;
+using System.Globalization;
+using VGT.Galaxy.Backend.Services.SignalManagement.Domain.Models;
 
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.SignalProcessing.SimpleOperations;
 
-public class AddOperation : ISignalProcessorOperation
+public class AddOperation : ISignalProcessorSimpleOperation
 {
+    public SignalProcessorOperationType OperationType { get; } = new SignalProcessorOperationType
+    {
+        Id = Guid.Parse("587159ea-13c2-45ff-a944-ffb30c2f3e88"),
+        Name = "+",
+        Type = Models.OperationType.Simple,
+        InputParameters = new List<Parameter>
+        {
+            new Parameter { Name = "a", DataType = "numeric" },
+            new Parameter { Name = "b", DataType = "numeric" }
+        },
+        OutputParameters = new List<Parameter>
+        {
+            new Parameter { Name = "result", DataType = "numeric" }
+        }
+    };
+
     public SignalProcessorOperationResult Execute(IDictionary<string, string> inputs)
     {
         if (!inputs.ContainsKey("a") || !inputs.ContainsKey("b"))
