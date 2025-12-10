@@ -4,7 +4,7 @@ namespace VGT.Galaxy.Backend.Services.SignalManagement.Domain.SignalProcessing.S
 
 public class AddOperation : ISignalProcessorOperation
 {
-    public IDictionary<string, string> Execute(IDictionary<string, string> inputs)
+    public SignalProcessorOperationResult Execute(IDictionary<string, string> inputs)
     {
         if (!inputs.ContainsKey("a") || !inputs.ContainsKey("b"))
         {
@@ -21,11 +21,16 @@ public class AddOperation : ISignalProcessorOperation
             throw new ArgumentException("Input 'b' is not a valid number.");
         }
 
+        var logs = $"Executing AddOperation with inputs: a={a}, b={b}";
         decimal result = a + b;
 
-        return new Dictionary<string, string>
+        return new SignalProcessorOperationResult
         {
-            { "result", result.ToString(CultureInfo.InvariantCulture) }
+            Outputs = new Dictionary<string, string>
+            {
+                { "result", result.ToString(CultureInfo.InvariantCulture) }
+            },
+            Logs = logs
         };
     }
 }

@@ -2,5 +2,5 @@
 
 public interface ISignalProcessorOperation
 {
-    IDictionary<string, string> Execute(IDictionary<string, string> inputs);
+    SignalProcessorOperationResult Execute(IDictionary<string, string> inputs);
 }

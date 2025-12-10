@@ -36,10 +36,12 @@ public class SignalProcessorExecutor
 
                 var inputs = GatherStepInputs(step, inputSignalValues, stepOutputs);
                 var operation = await ResolveOperation(step.Operation, ct);
-                stepOutputs[step.Id] = operation.Execute(inputs);
+                var operationResult = operation.Execute(inputs);
+                stepOutputs[step.Id] = operationResult.Outputs;
                 stepResults[step.Id] = new StepExecutionSuccess
                 {
-                    OutputValues = stepOutputs[step.Id]
+                    OutputValues = stepOutputs[step.Id],
+                    Logs = operationResult.Logs
                 };
                 WriteOutputsToSignals(step, stepOutputs[step.Id], signalOutputs);
             }
