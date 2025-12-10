@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
@@ -18,7 +19,7 @@ public class SignalProcessorController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetSignalProcessorsAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<SignalProcessorDto>>> GetSignalProcessorsAsync(CancellationToken cancellationToken)
     {
         var signalProcessors = await _service.GetAllAsync(cancellationToken);
         var signalProcessorDtos = signalProcessors.ToDto();
@@ -26,7 +27,7 @@ public class SignalProcessorController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetSignalProcessorByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<ActionResult<SignalProcessorDto>> GetSignalProcessorByIdAsync(string id, CancellationToken cancellationToken)
     {
         var signalProcessor = await _service.GetByIdAsync(id, cancellationToken);
         var signalProcessorDto = signalProcessor.ToDto();
@@ -34,7 +35,7 @@ public class SignalProcessorController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateSignalProcessorAsync([FromBody] SignalProcessorCreateRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<SignalProcessorDto>> CreateSignalProcessorAsync([FromBody] SignalProcessorCreateRequest request, CancellationToken cancellationToken)
     {
         var created = await _service.CreateAsync(request, cancellationToken);
         var createdDto = created.ToDto();
@@ -49,7 +50,7 @@ public class SignalProcessorController : ControllerBase
     }
 
     [HttpPost("{id}/invoke")]
-    public async Task<IActionResult> InvokeSignalProcessorAsync(string id, [FromBody] IDictionary<string, string> signalInputs, CancellationToken cancellationToken)
+    public async Task<ActionResult<SignalProcessorInvokeResultDto>> InvokeSignalProcessorAsync(string id, [FromBody] IDictionary<string, string> signalInputs, CancellationToken cancellationToken)
     {
         var result = await _service.InvokeAsync(id, signalInputs, cancellationToken);
         var resultDto = result.ToDto();

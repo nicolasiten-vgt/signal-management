@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
 
@@ -17,7 +18,7 @@ public class SignalProcessorOperationTypeController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<SignalProcessorOperationTypeDto>>> GetAllAsync(CancellationToken cancellationToken)
     {
         var operationTypes = await _service.GetAllAsync(cancellationToken);
         var operationTypeDtos = operationTypes.ToDto();

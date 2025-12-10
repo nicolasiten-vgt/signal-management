@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
@@ -18,7 +19,7 @@ public class SignalController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetSignalsAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<SignalDto>>> GetSignalsAsync(CancellationToken cancellationToken)
     {
         var signals = await _service.GetAllAsync(cancellationToken);
         var signalDtos = signals.ToDto();
@@ -26,7 +27,7 @@ public class SignalController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetSignalByIdAsync(string id, CancellationToken cancellationToken)
+    public async Task<ActionResult<SignalDto>> GetSignalByIdAsync(string id, CancellationToken cancellationToken)
     {
         var signal = await _service.GetByIdAsync(id, cancellationToken);
         var signalDto = signal.ToDto();
@@ -34,7 +35,7 @@ public class SignalController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateSignalAsync([FromBody] SignalCreateRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<SignalDto>> CreateSignalAsync([FromBody] SignalCreateRequest request, CancellationToken cancellationToken)
     {
         var created = await _service.CreateAsync(request, cancellationToken);
         var createdDto = created.ToDto();

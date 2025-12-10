@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Diagnostics;
 using VGT.Galaxy.Backend.Services.SignalManagement.Api;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
@@ -9,6 +8,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services
+    .AddEndpointsApiExplorer()
+    .AddSwaggerGen(options =>
+    {
+        options.UseOneOfForPolymorphism();
+        options.SelectDiscriminatorNameUsing(type => "type");
+    })
     .AddControllers()
     .AddJsonOptions(options =>
     {
@@ -33,6 +38,13 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.MapControllers();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
 
 app.Run();
 

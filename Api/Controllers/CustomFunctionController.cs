@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using VGT.Galaxy.Backend.Services.SignalManagement.Api.Dtos;
 using VGT.Galaxy.Backend.Services.SignalManagement.Api.Mappings;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Requests;
 using VGT.Galaxy.Backend.Services.SignalManagement.Application.Services;
@@ -18,7 +19,7 @@ public class CustomFunctionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetCustomFunctionsAsync(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<CustomFunctionDto>>> GetCustomFunctionsAsync(CancellationToken cancellationToken)
     {
         var customFunctions = await _service.GetAllAsync(cancellationToken);
         var customFunctionDtos = customFunctions.ToDto();
@@ -26,7 +27,7 @@ public class CustomFunctionController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetCustomFunctionByIdAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<ActionResult<CustomFunctionDto>> GetCustomFunctionByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         var customFunction = await _service.GetByIdAsync(id, cancellationToken);
         var customFunctionDto = customFunction.ToDto();
@@ -34,7 +35,7 @@ public class CustomFunctionController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCustomFunctionAsync([FromBody] CustomFunctionCreateRequest request, CancellationToken cancellationToken)
+    public async Task<ActionResult<CustomFunctionDto>> CreateCustomFunctionAsync([FromBody] CustomFunctionCreateRequest request, CancellationToken cancellationToken)
     {
         var created = await _service.CreateAsync(request, cancellationToken);
         var createdDto = created.ToDto();
