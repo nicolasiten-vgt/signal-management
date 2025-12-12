@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
@@ -11,9 +12,11 @@ using VGT.Galaxy.Backend.Services.SignalManagement.Persistence;
 namespace VGT.Galaxy.Backend.Services.SignalManagement.Persistence.Migrations
 {
     [DbContext(typeof(SignalDbContext))]
-    partial class SignalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251212075747_CreateCustomFunctionNameIndex")]
+    partial class CreateCustomFunctionNameIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

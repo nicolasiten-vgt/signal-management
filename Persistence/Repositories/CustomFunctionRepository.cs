@@ -20,6 +20,16 @@ public class CustomFunctionRepository : ICustomFunctionRepository
         await _db.SaveChangesAsync(cancellationToken);
         return ToDomain(entity);
     }
+    
+    public async Task<CustomFunction?> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    {
+        var entity = await _db
+            .CustomFunctions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(cf => cf.Name == name, cancellationToken);
+        
+        return entity == null ? null : ToDomain(entity);
+    }
 
     public async Task<CustomFunction?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {

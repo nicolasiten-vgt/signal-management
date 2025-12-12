@@ -16,6 +16,16 @@ public class SignalService : ISignalService
 
     public async Task<Signal> CreateAsync(SignalCreateRequest request, CancellationToken ct)
     {
+        // Check id uniqueness
+        var existing = await _repository.GetByIdAsync(request.Id, ct);
+        if (existing != null)
+        {
+            throw new ValidationException(new Dictionary<string, string[]>
+            {
+                ["Name"] = new[] { $"A Signal with id '{request.Id}' already exists" }
+            });
+        }
+        
         var signal = new Signal
         {
             Id = request.Id,

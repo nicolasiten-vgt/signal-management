@@ -16,6 +16,16 @@ public class CustomFunctionService : ICustomFunctionService
 
     public async Task<CustomFunction> CreateAsync(CustomFunctionCreateRequest request, CancellationToken ct)
     {
+        // Check name uniqueness
+        var existing = await _repository.GetByNameAsync(request.Name, ct);
+        if (existing != null)
+        {
+            throw new ValidationException(new Dictionary<string, string[]>
+            {
+                ["Name"] = new[] { $"A CustomFunction with name '{request.Name}' already exists" }
+            });
+        }
+        
         var customFunction = new CustomFunction
         {
             Name = request.Name,

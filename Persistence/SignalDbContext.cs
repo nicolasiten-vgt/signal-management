@@ -38,6 +38,7 @@ public class SignalDbContext : DbContext
             entity.HasKey(cf => cf.Id);
             entity.Property(cf => cf.Id).IsRequired();
             entity.Property(cf => cf.Name).IsRequired();
+            entity.HasIndex(cf => cf.Name).IsUnique();
             entity.Property(cf => cf.Language).IsRequired();
             entity.Property(cf => cf.SourceCode).IsRequired();
             entity.Property(cf => cf.Dependencies);
